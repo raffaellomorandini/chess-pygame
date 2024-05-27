@@ -26,6 +26,7 @@ class Pezzo:
         self.type : TipoPezzo = type
         self.colore : Colore = colore
         self.possibili : Pos = []
+        self.catture: Pos = []
         if(self.type.value == 6):
             self.has_moved : bool = False
 
@@ -34,7 +35,7 @@ class Scacchiera:
         self.center_x = center_x
         self.center_y = center_y
         self.tile = tile
-        self.piece = int(tile*0.7)
+        self.piece = int(tile*0.5)
         self.size = 8
         self.board = [[None]*self.size for _ in range(self.size)]
         for i in range(self.size):
@@ -63,28 +64,36 @@ class Scacchiera:
         self.pieces[7][6] = Pezzo(Rect(self.board[7][6].x+self.tile/2-self.piece/2, self.board[7][6].y+tile/2-self.piece/2, self.piece, self.piece), Pos(7,6), TipoPezzo.Cavallo, Colore.Bianco)
         self.pieces[7][7] = Pezzo(Rect(self.board[7][7].x+self.tile/2-self.piece/2, self.board[7][7].y+tile/2-self.piece/2, self.piece, self.piece), Pos(7,7), TipoPezzo.Torre, Colore.Bianco)
         for i in range(self.size):
-            self.pieces[6][i] = Pezzo(Rect(self.board[1][i].x+self.tile/2-self.piece/2, self.board[1][i].y+tile/2-self.piece/2, self.piece, self.piece), Pos(6,i), TipoPezzo.Pedone, Colore.Bianco)
+            self.pieces[6][i] = Pezzo(Rect(self.board[6][i].x+self.tile/2-self.piece/2, self.board[6][i].y+tile/2-self.piece/2, self.piece, self.piece), Pos(6,i), TipoPezzo.Pedone, Colore.Bianco)
 
     def possibili_pos(self, pezzo : Pezzo):
         pezzo.possibili = [] 
+        pezzo.catture = []
+        possibile_posizione = None
         if(pezzo.type.value == 6):
             dy = -1 if pezzo.colore.value == 0 else 1
-                pos1 = Pos(pezzo.pos.y-1,pezzo.pos.x)
-                if(self.pieces[pos1.y][pos1.x] == None):
-                    pezzo.possibili.push(pos1)
+            possibile_posizione = Pos(pezzo.pos.y-1*dy,pezzo.pos.x)
+            if(self.pieces[possibile_posizione.y][possibile_posizione.x] == None and possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size):
+                pezzo.possibili.append(possibile_posizione)
                 if(not pezzo.has_moved):
-                    pos2 = Pos(pezzo.pos.y-2,pezzo.pos.x)
-                    if(self.pieces[pos2.y][pos2.x] == None):
-                        pezzo.possibili.push(pos2)
-            
-            pos1 = Pos(pezzo.pos.y+1,pezzo.pos.x)
-            if(self.pieces[pos1.y][pos1.x] == None):
-                pezzo.possibili.push(pos1)
-            if(not pezzo.has_moved):
-                pos2 = Pos(pezzo.pos.y+2,pezzo.pos.x)
-                if(self.pieces[pos2.y][pos2.x] == None):
-                    pezzo.possibili.push(pos2)
-
+                    possibile_posizione = Pos(pezzo.pos.y-2*dy,pezzo.pos.x)
+                    if(self.pieces[possibile_posizione.y][possibile_posizione.x] == None and possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size):
+                        pezzo.possibili.append(possibile_posizione)
+            # Rivedere sta merda
+            possibile_posizione = Pos(pezzo.pos.y -1*dy, pezzo.pos.x+1)
+            if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
+                if(self.pieces[possibile_posizione.y][possibile_posizione.x] != None):
+                    pezzo.catture.append(possibile_posizione)
+            possibile_posizione = Pos(pezzo.pos.y -1*dy, pezzo.pos.x-1)
+            if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
+                if(self.pieces[possibile_posizione.y][possibile_posizione.x] != None):
+                    pezzo.catture.append(possibile_posizione)
+                
+    def calcola_pos(self):
+        for i in range(self.size):
+            for j in range(self.size):
+                if(self.pieces[i][j] != None):
+                    self.possibili_pos(pezzo=self.pieces[i][j])
 
 
 
