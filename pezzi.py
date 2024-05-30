@@ -2,8 +2,8 @@ from pygame import Rect
 from enum import Enum
 
 class TipoPezzo(Enum):
-    Regina = 1
-    Re = 2
+    Re = 1
+    Regina = 2
     Alfiere = 3
     Torre = 4
     Cavallo = 5
@@ -26,6 +26,7 @@ class Pezzo:
         self.type : TipoPezzo = type
         self.colore : Colore = colore
         self.possibili : Pos = []
+        self.is_defended = False
         if(self.type.value == 6):
             self.has_moved : bool = False
 
@@ -78,20 +79,23 @@ class Scacchiera:
                     possibile_posizione = Pos(pezzo.pos.y-2*dy,pezzo.pos.x)
                     if(self.pieces[possibile_posizione.y][possibile_posizione.x] == None and possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size):
                         pezzo.possibili.append(possibile_posizione)
-            # Rivedere sta merda
             possibile_posizione = Pos(pezzo.pos.y -1*dy, pezzo.pos.x+1)
             if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
                 if(self.pieces[possibile_posizione.y][possibile_posizione.x] != None):
                     if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
                         pezzo.possibili.append(possibile_posizione)
+                    else:
+                        self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
             possibile_posizione = Pos(pezzo.pos.y -1*dy, pezzo.pos.x-1)
             if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
                 if(self.pieces[possibile_posizione.y][possibile_posizione.x] != None):
                     
                     if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
                         pezzo.possibili.append(possibile_posizione)
+                    else:
+                        self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
         # CAVALLO
-        if(pezzo.type.value == 5):
+        elif(pezzo.type.value == 5):
             for i in range(2):
                 for j in range(2):
                     mult_y = -1 if i % 2 == 0 else 1
@@ -102,6 +106,8 @@ class Scacchiera:
 
                             if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
                                 pezzo.possibili.append(possibile_posizione)
+                            else:
+                                self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
                         else:
                             pezzo.possibili.append(possibile_posizione)
                     possibile_posizione = Pos(pezzo.pos.y + 1*mult_y, pezzo.pos.x + 2*mult_x)
@@ -110,10 +116,12 @@ class Scacchiera:
 
                             if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
                                 pezzo.possibili.append(possibile_posizione)
+                            else:
+                                self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
                         else:
                             pezzo.possibili.append(possibile_posizione)
         # TORRE
-        if(pezzo.type.value == 4):
+        elif(pezzo.type.value == 4):
             for i in range(2):
                 mult= -1 if i % 2 == 0 else 1
                 conta = 0
@@ -125,6 +133,8 @@ class Scacchiera:
                         if self.pieces[possibile_posizione.y][possibile_posizione.x] != None:
                             if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
                                 pezzo.possibili.append(possibile_posizione)
+                            else:
+                                self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
                             piece_encauntered = True
                         else:
                             pezzo.possibili.append(possibile_posizione)
@@ -144,19 +154,167 @@ class Scacchiera:
                         if self.pieces[possibile_posizione.y][possibile_posizione.x] != None:
                             if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
                                 pezzo.possibili.append(possibile_posizione)
+                            else:
+                                self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
                             piece_encauntered = True
                         else:
                             pezzo.possibili.append(possibile_posizione)
 
                     else: 
                         piece_encauntered = True
-           
+        
+        # ALFIERE
+        elif(pezzo.type.value == 3):
+            for i in range(2):
+                mult= -1 if i % 2 == 0 else 1
+                conta = 0
+                piece_encauntered = False
+                while not piece_encauntered:
+                    conta += 1
+                    possibile_posizione = Pos(pezzo.pos.y + conta*mult, pezzo.pos.x + conta*mult)
+                    if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
+                        if self.pieces[possibile_posizione.y][possibile_posizione.x] != None:
+                            if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
+                                pezzo.possibili.append(possibile_posizione)
+                            else:
+                                self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
+                            piece_encauntered = True
+                        else:
+                            pezzo.possibili.append(possibile_posizione)
+
+                    else: 
+                        piece_encauntered = True
+
+                conta = 0
+                piece_encauntered = False
+                while not piece_encauntered:
+                    conta += 1
+                    possibile_posizione = Pos(pezzo.pos.y + conta*-mult, pezzo.pos.x + conta*mult)
+                    if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
+                        if self.pieces[possibile_posizione.y][possibile_posizione.x] != None:
+                            if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
+                                pezzo.possibili.append(possibile_posizione)
+                            else:
+                                self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
+                            piece_encauntered = True
+                        else:
+                            pezzo.possibili.append(possibile_posizione)
+
+                    else: 
+                        piece_encauntered = True
+        
+        # REGINA
+        elif(pezzo.type.value == 2):
+            for i in range(2):
+                mult= -1 if i % 2 == 0 else 1
+                conta = 0
+                piece_encauntered = False
+                while not piece_encauntered:
+                    conta += 1
+                    possibile_posizione = Pos(pezzo.pos.y + conta*mult, pezzo.pos.x + conta*mult)
+                    if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
+                        if self.pieces[possibile_posizione.y][possibile_posizione.x] != None:
+                            if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
+                                pezzo.possibili.append(possibile_posizione)
+                            else:
+                                self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
+                            piece_encauntered = True
+                        else:
+                            pezzo.possibili.append(possibile_posizione)
+
+                    else: 
+                        piece_encauntered = True
+
+                conta = 0
+                piece_encauntered = False
+                while not piece_encauntered:
+                    conta += 1
+                    possibile_posizione = Pos(pezzo.pos.y + conta*-mult, pezzo.pos.x + conta*mult)
+                    if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
+                        if self.pieces[possibile_posizione.y][possibile_posizione.x] != None:
+                            if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
+                                pezzo.possibili.append(possibile_posizione)
+                            else:
+                                self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
+                            piece_encauntered = True
+                        else:
+                            pezzo.possibili.append(possibile_posizione)
+
+                    else: 
+                        piece_encauntered = True
+
+                conta = 0
+                piece_encauntered = False
+                while not piece_encauntered:
+                    conta += 1
+                    possibile_posizione = Pos(pezzo.pos.y + conta*mult, pezzo.pos.x)
+                    if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
+                        if self.pieces[possibile_posizione.y][possibile_posizione.x] != None:
+                            if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
+                                pezzo.possibili.append(possibile_posizione)
+                            else:
+                                self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
+                            piece_encauntered = True
+                        else:
+                            pezzo.possibili.append(possibile_posizione)
+
+                    else: 
+                        piece_encauntered = True
+                    
+               
+
+                conta = 0
+                piece_encauntered = False
+                while not piece_encauntered:
+                  
+                    conta += 1
+                    possibile_posizione = Pos(pezzo.pos.y, pezzo.pos.x + conta*mult)
+                    if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
+                        if self.pieces[possibile_posizione.y][possibile_posizione.x] != None:
+                            if self.pieces[possibile_posizione.y][possibile_posizione.x].colore != pezzo.colore:
+                                pezzo.possibili.append(possibile_posizione)
+                            else:
+                                self.pieces[possibile_posizione.y][possibile_posizione.x].is_defended = True
+                            piece_encauntered = True
+                        else:
+                            pezzo.possibili.append(possibile_posizione)
+
+                    else: 
+                        piece_encauntered = True
+
+        # RE
+        elif(pezzo.type.value == 1):
+            print("helpme")
+            for i in range(2):
+                #rivedere stam erda
+                for j in range(2):
+                    mult_1 = -1 if i % 2 == 0 else 1
+                    mult_2 = -1 if j % 2 == 0 else 1
+                    possibile_posizione = Pos(pezzo.pos.x + 1+mult_1, pezzo.pos.y + 1*mult_2)
+                    if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
+                        pezzo.possibili.append(possibile_posizione)
+
+                    possibile_posizione = Pos(pezzo.pos.x + 1+mult_1, pezzo.pos.y - 1*mult_2)
+                    if possibile_posizione.x >= 0 and possibile_posizione.x < self.size and possibile_posizione.y >= 0 and possibile_posizione.y < self.size:
+                        pezzo.possibili.append(possibile_posizione)
+
+
+
+            
 
     def calcola_pos(self):
+        lista_re = []
         for i in range(self.size):
             for j in range(self.size):
                 if(self.pieces[i][j] != None):
-                    self.possibili_pos(pezzo=self.pieces[i][j])
+                    self.pieces[i][j].is_defended = False
+                    if(self.pieces[i][j].type.value != 1):
+                        self.possibili_pos(pezzo=self.pieces[i][j])
+                    else:
+                        lista_re.append(self.pieces[i][j])
+        for re in lista_re:
+            self.possibili_pos(re)
+                        
 
 
 

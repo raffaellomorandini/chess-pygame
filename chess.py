@@ -52,7 +52,8 @@ while running:
                             if(scacchiera.board[i][j].x <= selected_piece.x and scacchiera.board[i][j].x+tile > selected_piece.x and scacchiera.board[i][j].y <= selected_piece.y and scacchiera.board[i][j].y + tile  > selected_piece.y):
                                 hasMoved = False
                                 for posizione in scacchiera.pieces[selected_piece_i][selected_piece_j].possibili:
-                                    if posizione.x == j and posizione.y ==i:
+                                    if posizione.x == j and posizione.y == i:
+                                        
                                         scacchiera.pieces[i][j] = scacchiera.pieces[selected_piece_i][selected_piece_j]
                                         scacchiera.pieces[i][j].pos.x = j
                                         scacchiera.pieces[i][j].pos.y = i
